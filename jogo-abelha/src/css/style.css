@@ -14,3 +14,19 @@ canvas{
     position: absolute;
 
 }
+
+/* Aula 25/11: botão de reiniciar, centralizado sobre o canvas */
+#reiniciar{
+    display: none; /* escondido até o game over */
+    position: absolute;
+    left: 50%;
+    top: 430px;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    font: bold 20px Arial, sans-serif;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #ffc800;
+}
+#reiniciar:hover{ background: #ffdb4d; }

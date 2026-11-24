@@ -1,94 +1,91 @@
-class obj{ // aqui estamos criando um molde
-    quadro = 1
-    timer = 0
-    constructor(posx,posy,largura,altura,cor){ // função que fabrica o objeto
+class obj{ // molde genérico: tudo que aparece na tela nasce daqui
+    quadro = 1 // quadro atual da animação
+    timer = 0  // contador para decidir a hora de trocar de quadro
+    constructor(posx,posy,largura,altura,cor){
         this.posx = posx
         this.posy = posy
         this.largura = largura
         this.altura = altura
-        this.cor = cor
+        this.cor = cor // caminho da imagem
     }
     desenharObj(){
-        let img = new Image()
-        img.src = this.cor
-        colmeia.drawImage(img,this.posx,this.posy,this.largura,this.altura)
+        // Melhoria: só cria uma nova Image quando o caminho muda.
+        // Antes, uma Image nova era criada a cada 10ms para cada objeto.
+        if(this.imgSrc !== this.cor){
+            this.img = new Image()
+            this.img.src = this.cor
+            this.imgSrc = this.cor
+        }
+        colmeia.drawImage(this.img,this.posx,this.posy,this.largura,this.altura)
     }
-        animacao(nomeImagem,limiteQuadro){
+    animacao(nomeImagem,limiteQuadro){
         this.timer += 1
-        if(this.timer > 10){
+        if(this.timer > 10){ // a cada ~10 ciclos troca de quadro
             this.timer = 0
             this.quadro += 1
         }
         if(this.quadro > limiteQuadro){
             this.quadro = 1
         }
-         this.cor = "img/" + nomeImagem + this.quadro+ ".png"
-    }    
+        this.cor = "src/img/" + nomeImagem + this.quadro + ".png"
+    }
 }
 
 class ABELHA extends obj{
-    dir = 0 // definindo a direção como zero 
+    dir = 0    // direção horizontal (negativo = esquerda, positivo = direita)
     vidas = 3
     pontos = 0
-    quadro = 1 // definindo o quadro da animação como 1
-    timer = 0 // definindo o timer da animação como 0
     move(){
         this.posx += this.dir
-        // incrementando um novo valor na posx da abelha
-    }  
-      colisao(objeto){
-        // 1 se a posição x da abelha for menor que a posição x
-        // da aranha no eixo x + largura da aranha
-        // 2 se a posição da abelha no eixo x + sua largura for maior que o objeto na posição
-        // 3 se a posição do eixo y for menor que a posição da aranha no eixo y + altura da aranha
-        // 4 se a posição da abelha no eixo y + sua altura for maior que o objeto na posição y 
+    }
+    // Colisão AABB (retângulos): só há colisão se houver sobreposição
+    // nos DOIS eixos ao mesmo tempo.
+    colisao(objeto){
         if(this.posx < objeto.posx + objeto.largura && this.posx + this.largura > objeto.posx &&
-           this.posy < objeto.posy + objeto.altura && this.posy + this.altura > objeto.posy
-        ){
+           this.posy < objeto.posy + objeto.altura && this.posy + this.altura > objeto.posy){
             return true
         }
-        else{
-            return false
-        }
+        return false
     }
 }
 
 class ARANHA extends obj{
-    quadro = 1
-    timer = 0 
     move(){
-        this.posy += 3 // Aranha deverá descer
-        if(this.posy > 620){
+        this.posy += 3 // a aranha desce
+        if(this.posy > 620){ // saiu da tela: volta ao topo em x aleatório
             this.posy = -100
             this.posx = Math.random() * (500-this.largura)
         }
     }
-recarregar(){
-    this.posy = -300
-    this.posx = Math.random()* (500-this.largura) 
-}
+    recarregar(){ // reposiciona acima da tela depois de uma colisão
+        this.posy = -300
+        this.posx = Math.random() * (500-this.largura)
+    }
 }
 
 class BG extends obj{
     move(velocidade,limite,posInicial){
-        this.posy +=velocidade
+        this.posy += velocidade
         if(this.posy > limite){
             this.posy = posInicial
         }
     }
 }
-class FLOR extends ARANHA{
-recarregar(){
-    this.posy = -350
-    this.posx = Math.random()* (500-this.largura) 
-}
 
+class FLOR extends ARANHA{ // herda o move() da aranha (descer)
+    recarregar(){
+        this.posy = -350
+        this.posx = Math.random() * (500-this.largura)
+    }
 }
 
 class TEXTO{
-    desenharTexto(valor,x,y,cor){
-        colmeia.font = "35px Arial black"
+    // tamanho é opcional (padrão 35) para reaproveitar a classe no "GAME OVER"
+    // alinhamento: "left" (padrão), "center" ou "right" em relação ao x
+    desenharTexto(valor,x,y,cor,tamanho = 35,alinhamento = "left"){
+        colmeia.font = tamanho + "px Arial black"
         colmeia.fillStyle = cor
-        colmeia.fillText(valor, x, y)
-    } 
+        colmeia.textAlign = alinhamento
+        colmeia.fillText(valor,x,y)
+    }
 }
